@@ -4,8 +4,14 @@ import java.io.IOException;
 
 import ghidra.app.util.bin.BinaryReader;
 
-/* WTF??????
+/*
+ * XXX: WTF???? This dosen't seem right. 
  *        63                     32 31       16 15         0
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     00h |    PAGE DATA OFFSET   | DATA SIZE |   FLAGS   |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ * More reliable looks:
+ * 		   32                     16           8           0
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h |    PAGE DATA OFFSET   | DATA SIZE |   FLAGS   |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
