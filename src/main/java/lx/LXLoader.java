@@ -50,11 +50,8 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 	@Override
 	public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
 		BinaryReader reader = new BinaryReader(provider, true);
-		if (reader.readNextAsciiString(2).equals("MZ") /*&&
-		XXX: This should work for other but dos not for MK.
+		if (reader.readNextAsciiString(2).equals("MZ") &&
 			reader.readByte(0x18) >= 0x40) {
-		*/
-				) {
 			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
 		}
 		
@@ -104,9 +101,9 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 		LXObjectTable []object_table;
 		LXObjectPageTable []object_page_table;
 		
-		/* XXX: This address should be obtained from 0x3c */
-		base_addr = 0x8fc8;
-		base_addr = 0x292E4;
+		/* Read address of the real header. */
+		reader.setPointerIndex(0x3c);
+		base_addr = reader.readNextUnsignedInt();
 		
 		reader.setPointerIndex(base_addr);
 		header = new LXHeader(reader);
