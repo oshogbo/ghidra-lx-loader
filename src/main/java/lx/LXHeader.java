@@ -1,18 +1,11 @@
 package lx;import java.io.IOException;
 
-import javax.help.FlatMap;
-
-import com.google.common.cache.CacheLoader.UnsupportedLoadingOperationException;
 
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.app.util.bin.StructConverter;
-import ghidra.app.util.bin.format.macho.commands.UnsupportedLoadCommand;
-import ghidra.program.flatapi.FlatProgramAPI;
-import ghidra.program.model.data.DWordDataType;
 import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.Structure;
 import ghidra.program.model.data.StructureDataType;
-import jnr.ffi.Struct.DWORD;
 
 /*         +-----+-----+-----+-----+-----+-----+-----+-----+
        00h | "L"   "X" |B-ORD|W-ORD|     FORMAT LEVEL      |

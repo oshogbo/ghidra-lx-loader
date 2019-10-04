@@ -3,8 +3,6 @@ package lx;
 import java.io.IOException;
 
 import ghidra.app.util.bin.BinaryReader;
-import ghidra.pcodeCPort.address.Address;
-import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.mem.MemoryBlock;
 
 /*
@@ -32,6 +30,32 @@ public class LXObjectTable {
 		page_table_index = reader.readNextUnsignedInt() - 1;
 		page_table_entries = reader.readNextUnsignedInt();
 		reserved = reader.readNextUnsignedInt();
+	}
+
+	public boolean isReadable() {
+		return (object_flags & 0x01) == 0x01;
+	}
+	
+	public boolean isWritable() {
+		return (object_flags & 0x02) == 0x02;
+	}
+	
+	public boolean isExecutable() {
+		return (object_flags & 0x04) == 0x04;
+	}
+	
+	public boolean objectHasPreloadPages() {
+		return (object_flags & 0x40) == 0x40;
+	}
+
+	public String getName() {
+		return isExecutable() ? "code" : "seg";
+	}
+	
+	public void setObjectPermissions(MemoryBlock block) {
+		block.setRead(isReadable());
+    	block.setWrite(isWritable());
+    	block.setExecute(isExecutable());
 	}
 	
 	/*
