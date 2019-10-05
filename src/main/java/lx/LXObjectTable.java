@@ -1,11 +1,14 @@
 package lx;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.program.model.mem.MemoryBlock;
 
 /*
+ * [Doc]
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h |     VIRTUAL SIZE      |    RELOC BASE ADDR    |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
@@ -16,12 +19,16 @@ import ghidra.program.model.mem.MemoryBlock;
  */
 
 public class LXObjectTable {
+	/* Struct ones. */
 	public long virtual_size;
 	public long reloc_base_addr;
 	public long object_flags;
 	public long page_table_index;
 	public long page_table_entries;
 	public long reserved;
+	
+	/* My private ones. */
+	private LinkedList<LXFixupRecordTable> fixups_for_opbject = new LinkedList<LXFixupRecordTable>();
 	
 	public LXObjectTable(BinaryReader reader) throws IOException {
 		virtual_size = reader.readNextUnsignedInt();
@@ -49,7 +56,7 @@ public class LXObjectTable {
 	}
 
 	public String getName() {
-		return isExecutable() ? "code" : "seg";
+		return isExecutable() ? "cseg" : "dseg";
 	}
 	
 	public void setObjectPermissions(MemoryBlock block) {
@@ -58,14 +65,11 @@ public class LXObjectTable {
     	block.setExecute(isExecutable());
 	}
 	
-	/*
-    private void createObject(FlatProgramAPI api) {
-    	MemoryBlock block = api.createMemoryBlock(,, api.toAddr(relac_base_addres), virtual_size, false);
-        
-    	block.setRead((object_flags & 0x01) == 0x01);
-        block.setWrite((object_flags & 0x02) == 0x02);
-        block.setExecute((object_flags & 0x04) == 0x04);
-    }
-    */
+	public void appendFixupTable(LXFixupRecordTable fr) {
+		fixups_for_opbject.add(fr);
+	}
 	
+	public Iterator<LXFixupRecordTable> fixupTableIterator() {
+		return fixups_for_opbject.iterator();
+	}
 }

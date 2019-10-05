@@ -5,6 +5,7 @@ import java.io.IOException;
 import ghidra.app.util.bin.BinaryReader;
 
 /*
+ * [Doc]
  * XXX: WTF???? This dosen't seem right. 
  *        63                     32 31       16 15         0
  *         +-----+-----+-----+-----+-----+-----+-----+-----+

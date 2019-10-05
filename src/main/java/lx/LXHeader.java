@@ -7,7 +7,9 @@ import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.Structure;
 import ghidra.program.model.data.StructureDataType;
 
-/*         +-----+-----+-----+-----+-----+-----+-----+-----+
+/*   
+ * [Doc]
+           +-----+-----+-----+-----+-----+-----+-----+-----+
        00h | "L"   "X" |B-ORD|W-ORD|     FORMAT LEVEL      |
            +-----+-----+-----+-----+-----+-----+-----+-----+
        08h | CPU TYPE  |  OS TYPE  |    MODULE VERSION     |

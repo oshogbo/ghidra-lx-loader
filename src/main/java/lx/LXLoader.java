@@ -69,11 +69,9 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 		/* Create segments. */
 		for (int hoi = 0; hoi < lx.sizeOfLXObjectTable(); hoi++) {
 			LXObjectTable ohdr = lx.getLXObjectTable(hoi);
-			String name = ohdr.getName() + Integer.toString(hoi);
+			String name = ohdr.getName() + Integer.toString(hoi + 1);
 			MemoryBlock block;
 			byte []data;
-			
-			System.out.printf("%x\n", ohdr.object_flags);
 			
 			if (!ohdr.objectHasPreloadPages()) {
 				continue;
