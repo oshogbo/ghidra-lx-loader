@@ -211,4 +211,8 @@ public class LX {
 		
 		return data;
 	}
+
+	public long getEIPAddress() {
+		return getLXObjectTable((int)header.eip_object - 1).reloc_base_addr + header.eip;
+	}
 }

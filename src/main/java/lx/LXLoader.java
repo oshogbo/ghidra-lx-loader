@@ -87,7 +87,8 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			}
 		}
 		
-   	 	//api.addEntryPoint(api.toAddr(header.eip));
-        //api.createFunction(api.toAddr(header.eip), "_entry");
+		api.addEntryPoint(api.toAddr(lx.getEIPAddress()));
+		api.disassemble(api.toAddr(lx.getEIPAddress()));
+		api.createFunction(api.toAddr(lx.getEIPAddress()), "_entry");
 	}
 }

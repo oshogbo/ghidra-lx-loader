@@ -37,7 +37,6 @@ public class LXFixupRecordTable {
     	 * 05h = 16-bit Offset fixup (16-bits).
          * 07h = 32-bit Offset fixup (32-bits).
          * 
-         * 
          * XXX:
          * 02h = 16-bit Selector fixup (16-bits).
          * 10h = Fixup to Alias Flag.

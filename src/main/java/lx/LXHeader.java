@@ -132,7 +132,7 @@ public class LXHeader implements StructConverter {
 		module_version = reader.readNextUnsignedInt();
 		module_flag = reader.readNextUnsignedInt();
 		module_of_pages = reader.readNextUnsignedInt();
-		eip_object = reader.readNextUnsignedInt();
+		eip_object = reader.readNextUnsignedInt() - 1;
 		eip = reader.readNextUnsignedInt();
 		esp_object = reader.readNextUnsignedInt();
 		esp = reader.readNextUnsignedInt();
