@@ -23,114 +23,113 @@ import ghidra.program.model.data.DataType;
 import ghidra.program.model.data.Structure;
 import ghidra.program.model.data.StructureDataType;
 
-/*   
+/*
  * [Doc]
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       00h | "L"   "X" |B-ORD|W-ORD|     FORMAT LEVEL      |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       08h | CPU TYPE  |  OS TYPE  |    MODULE VERSION     |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       10h |     MODULE FLAGS      |   MODULE # OF PAGES   |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       18h |     EIP OBJECT #      |          EIP          |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       20h |     ESP OBJECT #      |          ESP          |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       28h |       PAGE SIZE       |   PAGE OFFSET SHIFT   |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       30h |  FIXUP SECTION SIZE   | FIXUP SECTION CHECKSUM|
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       38h |  LOADER SECTION SIZE  |LOADER SECTION CHECKSUM|
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       40h |    OBJECT TABLE OFF   |  # OBJECTS IN MODULE  |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       48h | OBJECT PAGE TABLE OFF | OBJECT ITER PAGES OFF |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       50h | RESOURCE TABLE OFFSET |#RESOURCE TABLE ENTRIES|
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       58h | RESIDENT NAME TBL OFF |   ENTRY TABLE OFFSET  |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       60h | MODULE DIRECTIVES OFF | # MODULE DIRECTIVES   |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       68h | FIXUP PAGE TABLE OFF  |FIXUP RECORD TABLE OFF |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       70h | IMPORT MODULE TBL OFF | # IMPORT MOD ENTRIES  |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       78h |  IMPORT PROC TBL OFF  | PER-PAGE CHECKSUM OFF |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       80h |   DATA PAGES OFFSET   |    #PRELOAD PAGES     |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       88h | NON-RES NAME TBL OFF  | NON-RES NAME TBL LEN  |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       90h | NON-RES NAME TBL CKSM |   AUTO DS OBJECT #    |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       98h |    DEBUG INFO OFF     |    DEBUG INFO LEN     |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       A0h |   #INSTANCE PRELOAD   |   #INSTANCE DEMAND    |
-           +-----+-----+-----+-----+-----+-----+-----+-----+
-       A8h |       HEAPSIZE        |
-           +-----+-----+-----+-----+
-*/
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     00h | "L"   "X" |B-ORD|W-ORD|     FORMAT LEVEL      |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     08h | CPU TYPE  |  OS TYPE  |    MODULE VERSION     |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     10h |     MODULE FLAGS      |   MODULE # OF PAGES   |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     18h |     EIP OBJECT #      |          EIP          |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     20h |     ESP OBJECT #      |          ESP          |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     28h |       PAGE SIZE       |   PAGE OFFSET SHIFT   |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     30h |  FIXUP SECTION SIZE   | FIXUP SECTION CHECKSUM|
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     38h |  LOADER SECTION SIZE  |LOADER SECTION CHECKSUM|
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     40h |    OBJECT TABLE OFF   |  # OBJECTS IN MODULE  |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     48h | OBJECT PAGE TABLE OFF | OBJECT ITER PAGES OFF |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     50h | RESOURCE TABLE OFFSET |#RESOURCE TABLE ENTRIES|
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     58h | RESIDENT NAME TBL OFF |   ENTRY TABLE OFFSET  |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     60h | MODULE DIRECTIVES OFF | # MODULE DIRECTIVES   |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     68h | FIXUP PAGE TABLE OFF  |FIXUP RECORD TABLE OFF |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     70h | IMPORT MODULE TBL OFF | # IMPORT MOD ENTRIES  |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     78h |  IMPORT PROC TBL OFF  | PER-PAGE CHECKSUM OFF |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     80h |   DATA PAGES OFFSET   |    #PRELOAD PAGES     |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     88h | NON-RES NAME TBL OFF  | NON-RES NAME TBL LEN  |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     90h | NON-RES NAME TBL CKSM |   AUTO DS OBJECT #    |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     98h |    DEBUG INFO OFF     |    DEBUG INFO LEN     |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     A0h |   #INSTANCE PRELOAD   |   #INSTANCE DEMAND    |
+ *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *     A8h |       HEAPSIZE        |
+ *         +-----+-----+-----+-----+
+ */
 
 public class LXHeader implements StructConverter {
-	public String signature;			 	/* 00h */	
-	public byte b_ord;						/* 02h */
-	public byte w_ord;          			/* 03h */
-	public long	format_level;				/* 04h */
-	public int	cpu_type;					/* 08h */
-	public int	os_type;					/* 0Ah */
-	public long	module_version; 			/* 0Ch */
+	public String signature;				/* 00h */
+	public byte b_ord;					/* 02h */
+	public byte w_ord;					/* 03h */
+	public long format_level;				/* 04h */
+	public int  cpu_type;					/* 08h */
+	public int  os_type;					/* 0Ah */
+	public long module_version;				/* 0Ch */
 	public long module_flag;				/* 10h */
-	public long	module_of_pages;			/* 14h */
+	public long module_of_pages;				/* 14h */
 	public long eip_object;					/* 18h */
-	public long eip;						/* 1Ch */
+	public long eip;					/* 1Ch */
 	public long esp_object;					/* 20h */
-	public long esp;						/* 24h */
-	public long	page_size;					/* 28h */
-	/* 
+	public long esp;					/* 24h */
+	public long page_size;					/* 28h */
+	/*
 	 * ? bytes on the last page?
 	 * http://faydoc.tripod.com/formats/exe-LE.htm
 	 */
-	public long page_offset_shift;			/* 2Ch */
-	public long fixup_section_size;			/* 30h */
-	public long fixup_section_check_sum;	/* 34h */
-	public long loader_section_size;		/* 38h */
-	public long loader_section_check_sum;	/* 3Ch */
-	public long object_table_offset;		/* 40h */
-	public long objects_in_module;			/* 44h */
-	public long object_page_table_offset;	/* 48h */
-	public long object_iter_page_offset;	/* 4ch */
-	public long resource_table_offset;		/* 50h */
-	public long resource_table_entries;		/* 54h */
-	public long residance_name_tbl_offset;	/* 58h */
-	public long entry_table_offset;			/* 5Ch */
-	public long module_directives_offset;	/* 60h */
-	public long module_directives_count;	/* 64h */
-	public long fixup_page_table_offset;	/* 68h */
-	public long fixup_record_table_offset;	/* 6Ch */
-	public long import_module_name_table_offset; /* 70h */
-	public long import_module_name_entry_count; /* 74h */
-	public long import_procedure_name_table_offset;	/* 78h */
-	public long per_page_checksum_offset;	/* 7Ch */
-	public long data_pages_offset;			/* 80h */
+	public long page_offset_shift;				/* 2Ch */
+	public long fixup_section_size	;			/* 30h */
+	public long fixup_section_check_sum;			/* 34h */
+	public long loader_section_size;			/* 38h */
+	public long loader_section_check_sum;			/* 3Ch */
+	public long object_table_offset;			/* 40h */
+	public long objects_in_module;				/* 44h */
+	public long object_page_table_offset;			/* 48h */
+	public long object_iter_page_offset;			/* 4ch */
+	public long resource_table_offset;			/* 50h */
+	public long resource_table_entries;			/* 54h */
+	public long residance_name_tbl_offset;			/* 58h */
+	public long entry_table_offset	;			/* 5Ch */
+	public long module_directives_offset;			/* 60h */
+	public long module_directives_count;			/* 64h */
+	public long fixup_page_table_offset;			/* 68h */
+	public long fixup_record_table_offset;			/* 6Ch */
+	public long import_module_name_table_offset;		/* 70h */
+	public long import_module_name_entry_count;		/* 74h */
+	public long import_procedure_name_table_offset;		/* 78h */
+	public long per_page_checksum_offset;			/* 7Ch */
+	public long data_pages_offset;				/* 80h */
 	public long preload_pages;				/* 84h */
-	public long non_resident_name_tvl_offset; /* 88h */
-	public long non_resident_name_tbl_len;	/* 8Ch */
-	public long non_resident_name_tbl_cksm;	/* 90h */
+	public long non_resident_name_tvl_offset;		/* 88h */
+	public long non_resident_name_tbl_len;			/* 8Ch */
+	public long non_resident_name_tbl_cksm;			/* 90h */
 	public long auto_ds_object;				/* 94h */
-	public long debug_info_offset;			/* 98h */
+	public long debug_info_offset;				/* 98h */
 	public long debug_info_len;				/* 9Ch */
-	public long instance_preload;			/* A0h */
-	public long instance_demand;			/* A4h */
+	public long instance_preload;				/* A0h */
+	public long instance_demand;				/* A4h */
 	public long heapsize;					/* A8h */
 
-	
 	public LXHeader(BinaryReader reader) throws IOException {
 		signature = reader.readNextAsciiString(2);
 		if (!signature.equals("LX") && !signature.equals("LE")) {
 			throw new UnknownError("Unknwon file format: " + signature);
 		}
-		
+
 		b_ord = reader.readNextByte();
 		if (b_ord != 0) {
 			throw new UnknownError("Unsuported big endian");

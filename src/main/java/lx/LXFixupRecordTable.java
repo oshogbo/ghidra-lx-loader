@@ -23,12 +23,12 @@ import ghidra.app.util.bin.BinaryReader;
 public class LXFixupRecordTable {
 	/*
 	 *         +-----+-----+-----+-----+
-     *     00h | SRC |FLAGS|SRCOFF/CNT*|
-     *		   +-----+-----+-----+-----+-----+-----+
+	 *     00h | SRC |FLAGS|SRCOFF/CNT*|
+	 *	   +-----+-----+-----+-----+-----+-----+
    	 * 03h/04h |           TARGET DATA *           |
-     *         +-----+-----+-----+-----+-----+-----+
-     *         | SRCOFF1 @ |   . . .   | SRCOFFn @ |
-     *         +-----+-----+----   ----+-----+-----+
+	 *         +-----+-----+-----+-----+-----+-----+
+	 *         | SRCOFF1 @ |   . . .   | SRCOFFn @ |
+	 *         +-----+-----+----   ----+-----+-----+
 	 */
 	
 	public byte src;
