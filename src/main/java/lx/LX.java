@@ -229,6 +229,6 @@ public class LX {
 	}
 
 	public long getEIPAddress() {
-		return getLXObjectTable((int)header.eip_object - 1).reloc_base_addr + header.eip;
+		return getLXObjectTable((int)header.eip_object).reloc_base_addr + header.eip;
 	}
 }
