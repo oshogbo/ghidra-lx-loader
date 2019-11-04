@@ -4,7 +4,7 @@ A Ghidra loader module for the Linear eXecutable Module Format.
 
 ## Installation
 
-Copy the ZIP file from the `dist/` to the `GHIDRA_INSTALL_DIR/Extensions/Ghidra` directory and install the module from the `File > Install extensions...` menu on the main screen.
+Download the ZIP file from the [releases](https://github.com/oshogbo/ghidra-lx-loader/releases) to the `GHIDRA_INSTALL_DIR/Extensions/Ghidra` directory and install the module from the `File > Install extensions...` menu on the main screen.
 
 ## ToDos
 
