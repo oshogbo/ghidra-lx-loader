@@ -79,7 +79,7 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			data = lx.readObjectData(reader, ohdr);
 			
 			try {
-				block = api.createMemoryBlock(name, api.toAddr(ohdr.reloc_base_addr), data, true);
+				block = api.createMemoryBlock(name, api.toAddr(ohdr.reloc_base_addr), data, false);
 				ohdr.setObjectPermissions(block);
 			} catch (Exception e) {
 				Msg.error(this, e.getMessage());
