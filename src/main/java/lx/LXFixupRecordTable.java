@@ -25,12 +25,12 @@ public class LXFixupRecordTable {
 	 *         +-----+-----+-----+-----+
 	 *     00h | SRC |FLAGS|SRCOFF/CNT*|
 	 *	   +-----+-----+-----+-----+-----+-----+
-   	 * 03h/04h |           TARGET DATA *           |
+	 * 03h/04h |           TARGET DATA *           |
 	 *         +-----+-----+-----+-----+-----+-----+
 	 *         | SRCOFF1 @ |   . . .   | SRCOFFn @ |
 	 *         +-----+-----+----   ----+-----+-----+
 	 */
-	
+
 	public byte src;
 	public byte flags;
 	public int srcoff;
@@ -40,41 +40,39 @@ public class LXFixupRecordTable {
 	/* My private one.*/
 	private long size = 4;
 	private int dstOffset[];
-	
+
     public LXFixupRecordTable(BinaryReader reader, long offsetBase) throws IOException {
-    	src = reader.readNextByte();
-    	flags = reader.readNextByte();
-    	srcoff = reader.readNextUnsignedShort();
+	src = reader.readNextByte();
+	flags = reader.readNextByte();
+	srcoff = reader.readNextUnsignedShort();
     	
     	/* 
     	 * Source type.
     	 * Supporting:
     	 * 05h = 16-bit Offset fixup (16-bits).
          * 07h = 32-bit Offset fixup (32-bits).
+         * 08h = 32-bit Self-relative offset fixup
          * 20h = Source List Flag.
          * 
          * XXX:
          * 02h = 16-bit Selector fixup (16-bits).
          * 10h = Fixup to Alias Flag.
-    	 */
-    	if ((src & ~0x3F) != 0) {	
-    		throw new UnknownError("Unsupported fixup type" + src);
-    	}
-    	
+		 */
     	switch (getSourceType()) {
     	case 0x02:
     	case 0x05:
     	case 0x07:
+    	case 0x08:
     		break;
     	default:
-    		throw new UnknownError("Unsupported fixup source");
+    		throw new UnknownError("Unsupported fixup source: " + getSourceType());
     	}
     	
     	/*
     	 * Supported flags 0x10 and 0x40.
     	 */
     	if ((flags & ~0x50) != 0) {
-    		throw new UnknownError("Unsupported target flags");
+    		throw new UnknownError("Unsupported target flags: " + flags);
     	}
 
     	/*

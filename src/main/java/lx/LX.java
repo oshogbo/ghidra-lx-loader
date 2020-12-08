@@ -207,6 +207,9 @@ public class LX {
 				case 0x07: /* 32-bit */
 					emitU32(data, frt.getDSTOffset(i), memAddr);
 					break;
+				case 0x08: /* 32-bit Self-relative offset fixup */
+					emitU32(data, frt.getDSTOffset(i), frt.getDSTOffset(i) + frt.trgoff);
+					break;
 				}
 			}
 		}
