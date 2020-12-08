@@ -39,26 +39,26 @@ public class LXFixupRecordTable {
 
 	/* My private one.*/
 	private long size = 4;
-	private int dstOffset;
+	private int dstOffset[];
 	
     public LXFixupRecordTable(BinaryReader reader, long offsetBase) throws IOException {
     	src = reader.readNextByte();
     	flags = reader.readNextByte();
     	srcoff = reader.readNextUnsignedShort();
-    	this.dstOffset = (int)offsetBase + srcoff;
     	
     	/* 
     	 * Source type.
     	 * Supporting:
     	 * 05h = 16-bit Offset fixup (16-bits).
          * 07h = 32-bit Offset fixup (32-bits).
+         * 20h = Source List Flag.
          * 
          * XXX:
          * 02h = 16-bit Selector fixup (16-bits).
          * 10h = Fixup to Alias Flag.
     	 */
-    	if ((src & ~0x1F) != 0) {	
-    		throw new UnknownError("Unsupported fixup type");
+    	if ((src & ~0x3F) != 0) {	
+    		throw new UnknownError("Unsupported fixup type" + src);
     	}
     	
     	switch (getSourceType()) {
@@ -115,6 +115,17 @@ public class LXFixupRecordTable {
         	trgoff = reader.readNextUnsignedShort();
         	size += 2;
         }
+        
+        if ((src & 0x20) == 0x20) {
+            this.dstOffset = new int[srcoff];
+            for (int i = 0; i < srcoff; i++) {
+                srcoff = reader.readNextUnsignedShort();
+                this.dstOffset[i] = (int)offsetBase + srcoff;
+            }
+        } else {
+            this.dstOffset = new int[1];
+            this.dstOffset[0] = (int)offsetBase + srcoff;
+        }
     }
     
     public long getSizeInFile() {
@@ -125,7 +136,11 @@ public class LXFixupRecordTable {
     	return src & 0xF;
     }
     
-    public int getDSTOffset() {
-    	return dstOffset;
+    public int getDSTOffsetCount() {
+    	return dstOffset.length;
+    }
+    
+    public int getDSTOffset(int index) {
+    	return dstOffset[index];
     }
 }

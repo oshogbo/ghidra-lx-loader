@@ -183,29 +183,31 @@ public class LX {
 
 			memAddr = getLXObjectTable((int)frt.object).reloc_base_addr + frt.trgoff;
 
-			if (data.length < frt.getDSTOffset()) {
-				/* XXX: What supposed should I do? */
-				/*
-				 * [DOC]
-				 * Note that for fixups that  cross page  boundaries, a
-				 * separate  fixup  record is  specified for each page.
-				 * An offset is still used for the 2nd  page but it now
-				 * becomes a negative offset since the fixup originated
-				 * on  the  preceding page.  (For  example, if only the
-				 * last one byte of a 32-bit address is on the page  to
-				 * be fixed up, then the offset would  have  a value of
-				 * -3.)
-				 */
-				continue;
-			}
+			for (int i = 0; i < frt.getDSTOffsetCount(); i++) {
+				if (data.length < frt.getDSTOffset(i)) {
+					/* XXX: What supposed should I do? */
+					/*
+					 * [DOC]
+					 * Note that for fixups that  cross page  boundaries, a
+					 * separate  fixup  record is  specified for each page.
+					 * An offset is still used for the 2nd  page but it now
+					 * becomes a negative offset since the fixup originated
+					 * on  the  preceding page.  (For  example, if only the
+					 * last one byte of a 32-bit address is on the page  to
+					 * be fixed up, then the offset would  have  a value of
+					 * -3.)
+					 */
+					continue;
+				}
 
-			switch (frt.getSourceType()) {
-			case 0x05: /* 16-bit */
-				emitU16(data, frt.getDSTOffset(), memAddr);
-				break;
-			case 0x07: /* 32-bit */
-				emitU32(data, frt.getDSTOffset(), memAddr);
-				break;
+				switch (frt.getSourceType()) {
+				case 0x05: /* 16-bit */
+					emitU16(data, frt.getDSTOffset(i), memAddr);
+					break;
+				case 0x07: /* 32-bit */
+					emitU32(data, frt.getDSTOffset(i), memAddr);
+					break;
+				}
 			}
 		}
 	}
