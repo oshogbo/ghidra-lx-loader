@@ -32,7 +32,7 @@ import ghidra.util.Msg;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 
-public class LXLoader extends AbstractLibrarySupportLoader {	
+public class LXLoader extends AbstractLibrarySupportLoader {
 	@Override
 	public String getName() {
 		return "Linear eXecutable Module Format";
@@ -41,12 +41,19 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 	@Override
 	public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
 		BinaryReader reader = new BinaryReader(provider, true);
-		if (reader.readNextAsciiString(2).equals("MZ") &&
-			reader.readByte(0x18) >= 0x40) {
+		String signature = reader.readNextAsciiString(2);
+
+		// Standalone LE/LX file
+		if ("LE".equals(signature) || "LX".equals(signature)) {
+			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
+		}
+
+		// Embedded LE/LX file
+		if ("MZ".equals(signature) && reader.readByte(0x18) >= 0x40) {
 			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
 		}
 		
-		return new ArrayList<>();
+		return List.of();
 	}
 	
 	@Override
@@ -57,10 +64,16 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 		long base_addr;
 		BinaryReader reader = new BinaryReader(provider, true);
 		FlatProgramAPI api = new FlatProgramAPI(program, monitor);
-		
-		/* Read address of the real header. */
-		reader.setPointerIndex(0x3c);
-		base_addr = reader.readNextUnsignedInt();
+		String signature = reader.readNextAsciiString(2);
+		boolean embedded = !("LE".equals(signature) || "LX".equals(signature));
+
+		if (embedded) {
+			/* Read address of the real header. */
+			reader.setPointerIndex(0x3c);
+			base_addr = reader.readNextUnsignedInt();
+		} else {
+			base_addr = 0;
+		}
 		
 		/* Parse LX/LE. */
 		lx = new LX(reader, base_addr);
