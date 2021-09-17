@@ -54,7 +54,7 @@ public class LX {
 
 		reader.setPointerIndex(base_addr + header.object_page_table_offset);
 		for (int i = 0; i < (int)header.module_of_pages; i++) {
-			opt[i] = new LXObjectPageTable(reader);
+			opt[i] = new LXObjectPageTable(reader, header.isLe);
 		}
 
 		return opt;
@@ -109,11 +109,15 @@ public class LX {
 		}
 	}
 
-	public LX(BinaryReader reader, long base_addr) throws IOException {
+	public LX(BinaryReader reader, long base_addr, long exeoffset) throws IOException {
 		this.base_addr = base_addr;
 		reader.setPointerIndex(base_addr);
 
 		header = new LXHeader(reader);
+		// data_pages_offset contains the offset relative to the exe start
+	    // in an mz/le, add the offset to the beginning of the embedded exe
+		header.data_pages_offset += exeoffset;
+		
 		object_table = loadObjectTable(reader);
 		object_page_table = loadObjectPageTable(reader);
 		fixup_page_table = loadFixupPageTable(reader);
@@ -139,8 +143,10 @@ public class LX {
 	private long getPageFileOffset(int oi) {
 		LXObjectPageTable opt = getLXObjectPageTable(oi);
 
-		return (opt.page_data_offset + opt.data_size - 1) *
-				header.page_size + header.data_pages_offset;
+		if(header.isLe)
+			return (opt.page_num-1) * header.page_size + header.data_pages_offset;
+		else
+			return (opt.page_data_offset + opt.data_size - 1) * header.page_size + header.data_pages_offset;
 	}
 
 	private long getPageFileSize(LXObjectTable ohdr, int oi, long datapos) {
@@ -203,6 +209,10 @@ public class LX {
 				switch (frt.getSourceType()) {
 				case 0x05: /* 16-bit */
 					emitU16(data, frt.getDSTOffset(i), memAddr);
+					break;
+				case 0x06: /* 16:32 bit Pointer */
+					/* XXX: What todo ? */
+					emitU32(data, frt.getDSTOffset(i), memAddr);
 					break;
 				case 0x07: /* 32-bit */
 					emitU32(data, frt.getDSTOffset(i), memAddr);
