@@ -45,16 +45,15 @@ public class LXObjectPageTable {
 	
 	public int flags;
 	
-	public LXObjectPageTable(BinaryReader reader, boolean bIsLe) throws IOException {
+	public LXObjectPageTable(BinaryReader reader, boolean bisLe) throws IOException {
 		
-		if(bIsLe) {
+		if (bisLe) {
 			page_num = reader.readNextUnsignedByte();
 			page_num = page_num << 8;
 			page_num |= reader.readNextUnsignedByte();
 			page_num = page_num << 8;
 			page_num |= reader.readNextUnsignedByte();		
-		}
-		else {
+		} else {
 			page_data_offset = reader.readNextShort();
 			data_size = reader.readNextUnsignedByte();
 		}

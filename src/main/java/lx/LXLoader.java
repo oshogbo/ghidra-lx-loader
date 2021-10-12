@@ -115,11 +115,11 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 		BinaryReader reader = new BinaryReader(provider, true);
 	
 		// skip any stub data
-		if(!findStartOffset(reader))
-			// no linear executable found
+		// no linear executable found
+		if (!findStartOffset(reader))
 			return List.of();
-		else
-			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
+
+		return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
 	}
 	
 	@Override

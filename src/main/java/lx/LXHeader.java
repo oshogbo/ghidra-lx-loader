@@ -73,8 +73,6 @@ import ghidra.program.model.data.StructureDataType;
  */
 
 public class LXHeader implements StructConverter {
-	public boolean isLe;
-
 	public String signature;				/* 00h */
 	public byte b_ord;					/* 02h */
 	public byte w_ord;					/* 03h */
@@ -126,16 +124,15 @@ public class LXHeader implements StructConverter {
 	public long instance_demand;				/* A4h */
 	public long heapsize;					/* A8h */
 
+	public boolean isLe() {
+		return signature.equals("LE");
+	}
+
 	public LXHeader(BinaryReader reader) throws IOException {
 		signature = reader.readNextAsciiString(2);
 		if (!signature.equals("LX") && !signature.equals("LE")) {
 			throw new UnknownError("Unknwon file format: " + signature);
 		}
-		
-		if(signature.equals("LE"))
-			isLe = true;
-		else
-			isLe = false;
 
 		b_ord = reader.readNextByte();
 		if (b_ord != 0) {

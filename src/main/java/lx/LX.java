@@ -145,10 +145,11 @@ public class LX {
 	private long getPageFileOffset(int oi) {
 		LXObjectPageTable opt = getLXObjectPageTable(oi);
 
-		if(header.isLe)
+		if (header.isLe)
 			return (opt.page_num-1) * header.page_size + header.data_pages_offset;
-		else
-			return (opt.page_data_offset + opt.data_size - 1) * header.page_size + header.data_pages_offset;
+
+		return (opt.page_data_offset + opt.data_size - 1) *
+				header.page_size + header.data_pages_offset;
 	}
 
 	private long getPageFileSize(LXObjectTable ohdr, int oi, long datapos) {
