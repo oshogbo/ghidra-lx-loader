@@ -36,10 +36,11 @@ import ghidra.app.util.bin.BinaryReader;
  *         
  */
 public class LXObjectPageTable {
-	// lx format
+	// LX format
 	public long page_data_offset;
 	public int data_size;
-	// le format
+
+	// LE format
 	public long page_num;
 	
 	public int flags;

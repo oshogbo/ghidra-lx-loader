@@ -114,8 +114,10 @@ public class LX {
 		reader.setPointerIndex(base_addr);
 
 		header = new LXHeader(reader);
-		// data_pages_offset contains the offset relative to the exe start
-	    // in an mz/le, add the offset to the beginning of the embedded exe
+		/*
+		 * data_pages_offset contains the offset relative to the exe start
+		 * in an MZ/LE, add the offset to the beginning of the embedded exe.
+		 */
 		header.data_pages_offset += exeoffset;
 		
 		object_table = loadObjectTable(reader);
