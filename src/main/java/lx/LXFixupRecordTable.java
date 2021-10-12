@@ -50,6 +50,7 @@ public class LXFixupRecordTable {
     	 * Source type.
     	 * Supporting:
     	 * 05h = 16-bit Offset fixup (16-bits).
+    	 * 06h = 16:32 Pointer fixup (48-bits).
          * 07h = 32-bit Offset fixup (32-bits).
          * 08h = 32-bit Self-relative offset fixup
          * 20h = Source List Flag.
@@ -61,6 +62,7 @@ public class LXFixupRecordTable {
     	switch (getSourceType()) {
     	case 0x02:
     	case 0x05:
+    	case 0x06:
     	case 0x07:
     	case 0x08:
     		break;

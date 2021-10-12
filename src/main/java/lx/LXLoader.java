@@ -33,27 +33,93 @@ import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 
 public class LXLoader extends AbstractLibrarySupportLoader {
+	
+	public long 						exeoffset;
+	public long 						linoffset;
+		
+	
 	@Override
 	public String getName() {
 		return "Linear eXecutable Module Format";
+	}
+	
+	public boolean findStartOffset(BinaryReader reader) throws IOException {
+		String signature;
+		long 	datalen;
+		long 	offset;
+		int		exelen, tmp;
+		
+
+		// skip any stub data
+		offset = 0;
+		exeoffset = 0;
+		datalen = reader.length();
+		
+		while(datalen > 2)
+		{
+			signature = reader.readAsciiString(offset, 2);		
+			/* Standalone LE/LX file */
+			if ("LE".equals(signature) || "LX".equals(signature)) {
+				linoffset = offset;
+				return true;
+			}
+			
+			if("MZ".equals(signature))
+			{
+				/* save the start of this exe file as the last exe offset */
+				exeoffset = offset;
+				/* got an embedded LE */ 
+				if(reader.readByte(offset + 0x18) >= 0x40) {	
+					
+					offset += reader.readUnsignedInt(offset + 0x3C);
+					
+					continue;
+				}
+				
+				/*  mz stub header, skip */
+				exelen = reader.readUnsignedShort(offset + 0x04);
+				exelen *= 512;
+				tmp = reader.readUnsignedShort(offset + 0x02);
+				if(tmp != 0)
+					exelen -= (512 - tmp);
+				
+				offset += exelen;
+				datalen -= exelen;
+			}
+			else if("BW".equals(signature))
+			{
+				/* 
+				 * DOS/4G Executable
+				 * exp stub header, skip
+				 */
+				exelen = reader.readUnsignedShort(offset + 0x04);
+				exelen *= 512;
+				tmp = reader.readUnsignedShort(offset + 0x02);
+				if(tmp != 0)
+					exelen += tmp;
+				
+				offset += exelen;
+				datalen -= exelen;
+			}
+			else
+				/* unknown/invalid stub header signature */
+				break;			
+		}
+		
+		/* no linear executable found */
+		return false;
 	}
 
 	@Override
 	public Collection<LoadSpec> findSupportedLoadSpecs(ByteProvider provider) throws IOException {
 		BinaryReader reader = new BinaryReader(provider, true);
-		String signature = reader.readNextAsciiString(2);
-
-		// Standalone LE/LX file
-		if ("LE".equals(signature) || "LX".equals(signature)) {
+	
+		// skip any stub data
+		if(!findStartOffset(reader))
+			// no linear executable found
+			return List.of();
+		else
 			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
-		}
-
-		// Embedded LE/LX file
-		if ("MZ".equals(signature) && reader.readByte(0x18) >= 0x40) {
-			return List.of(new LoadSpec(this, 0, new LanguageCompilerSpecPair("x86:LE:32:default", "gcc"), true));
-		}
-		
-		return List.of();
 	}
 	
 	@Override
@@ -64,20 +130,17 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 		long base_addr;
 		BinaryReader reader = new BinaryReader(provider, true);
 		FlatProgramAPI api = new FlatProgramAPI(program, monitor);
-		String signature = reader.readNextAsciiString(2);
-		boolean embedded = !("LE".equals(signature) || "LX".equals(signature));
+		
 
-		if (embedded) {
-			/* Read address of the real header. */
-			reader.setPointerIndex(0x3c);
-			base_addr = reader.readNextUnsignedInt();
-		} else {
-			base_addr = 0;
-		}
+	    if(!findStartOffset(reader))
+	    	throw new CancelledException();
+
+	    base_addr = linoffset;
+	    
 		
 		/* Parse LX/LE. */
-		lx = new LX(reader, base_addr);
-		
+		lx = new LX(reader, base_addr, exeoffset);
+			
 		/* Create segments. */
 		for (int hoi = 0; hoi < lx.sizeOfLXObjectTable(); hoi++) {
 			LXObjectTable ohdr = lx.getLXObjectTable(hoi);
@@ -85,9 +148,8 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			MemoryBlock block;
 			byte []data;
 			
-			if (!ohdr.objectHasPreloadPages()) {
+			if(!lx.getHeader().isLe && !ohdr.objectHasPreloadPages()) 
 				continue;
-			}
 
 			data = lx.readObjectData(reader, ohdr);
 			

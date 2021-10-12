@@ -32,16 +32,33 @@ import ghidra.app.util.bin.BinaryReader;
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h |    PAGE DATA OFFSET   | DATA SIZE |   FLAGS   |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
+ *         
+ *         
  */
 public class LXObjectPageTable {
+	// lx format
 	public long page_data_offset;
 	public int data_size;
+	// le format
+	public long page_num;
+	
 	public int flags;
 	
-	public LXObjectPageTable(BinaryReader reader) throws IOException {
-		page_data_offset = reader.readNextShort();
-		data_size = reader.readNextUnsignedByte();
+	public LXObjectPageTable(BinaryReader reader, boolean bIsLe) throws IOException {
+		
+		if(bIsLe) {
+			page_num = reader.readNextUnsignedByte();
+			page_num = page_num << 8;
+			page_num |= reader.readNextUnsignedByte();
+			page_num = page_num << 8;
+			page_num |= reader.readNextUnsignedByte();		
+		}
+		else {
+			page_data_offset = reader.readNextShort();
+			data_size = reader.readNextUnsignedByte();
+		}
 		flags = reader.readNextUnsignedByte();
+		
 		if (flags > 4) {
 			throw new UnknownError("Wrong flags" + Integer.toString(flags));
 		}
