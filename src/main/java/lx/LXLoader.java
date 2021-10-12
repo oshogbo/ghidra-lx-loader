@@ -148,7 +148,7 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			MemoryBlock block;
 			byte []data;
 			
-			if(!lx.getHeader().isLe && !ohdr.objectHasPreloadPages()) 
+			if (!lx.getHeader().isLe() && !ohdr.objectHasPreloadPages())
 				continue;
 
 			data = lx.readObjectData(reader, ohdr);

@@ -54,7 +54,7 @@ public class LX {
 
 		reader.setPointerIndex(base_addr + header.object_page_table_offset);
 		for (int i = 0; i < (int)header.module_of_pages; i++) {
-			opt[i] = new LXObjectPageTable(reader, header.isLe);
+			opt[i] = new LXObjectPageTable(reader, header.isLe());
 		}
 
 		return opt;
@@ -145,7 +145,7 @@ public class LX {
 	private long getPageFileOffset(int oi) {
 		LXObjectPageTable opt = getLXObjectPageTable(oi);
 
-		if (header.isLe)
+		if (header.isLe())
 			return (opt.page_num-1) * header.page_size + header.data_pages_offset;
 
 		return (opt.page_data_offset + opt.data_size - 1) *
