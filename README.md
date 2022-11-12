@@ -22,7 +22,7 @@ Mariusz Zaborski <oshogbo@FreeBSD.org>
 
 ## Verficattion
 
-I verfived output of the module vs IDA Freeware 4.1 and swars source code.
+I verified output of the module vs IDA Freeware 4.1 and swars source code.
 
 ## Resources
 
