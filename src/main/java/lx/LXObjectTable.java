@@ -77,8 +77,8 @@ public class LXObjectTable {
 	
 	public void setObjectPermissions(MemoryBlock block) {
 		block.setRead(isReadable());
-    	block.setWrite(isWritable());
-    	block.setExecute(isExecutable());
+		block.setWrite(isWritable());
+		block.setExecute(isExecutable());
 	}
 	
 	public void appendFixupTable(LXFixupRecordTable fr) {
