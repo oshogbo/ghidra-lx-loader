@@ -33,7 +33,7 @@ public class LXFixupRecordTable {
 
 	public byte src;
 	public byte flags;
-	public int srcoff;
+	public int srcoff_count;
 	public long object;
 	public long trgoff;
 
@@ -44,7 +44,22 @@ public class LXFixupRecordTable {
     public LXFixupRecordTable(BinaryReader reader, long offsetBase) throws IOException {
 	src = reader.readNextByte();
 	flags = reader.readNextByte();
-	srcoff = reader.readNextUnsignedShort();
+
+	/*
+	 * [Doc]
+	 * 20h = Source List flag.
+	 *
+	 * When  the  'Source  List'  Flag is set,  the
+	 * SRCOFF field  is compressed  to  a byte  and
+	 * contains the number of source offsets.
+	 */
+	if ((src & 0x20) == 0x20) {
+		srcoff_count = reader.readNextByte();
+		size += 1;
+	} else {
+		srcoff_count = reader.readNextUnsignedShort();
+		size += 2;
+	}
     	
     	/* 
     	 * Source type.
@@ -115,16 +130,24 @@ public class LXFixupRecordTable {
         	trgoff = reader.readNextUnsignedShort();
         	size += 2;
         }
-        
+
+        /*
+    	 * [Doc]
+         * 20h = When  the  'Source  List'  Flag is set,  the
+         * SRCOFF field contains the number of source offsets, and a
+         * list  of source  offsets  follows the end of
+         * fixup  record (after  the  optional additive
+         * value).
+         */
         if ((src & 0x20) == 0x20) {
-            this.dstOffset = new int[srcoff];
-            for (int i = 0; i < srcoff; i++) {
-                srcoff = reader.readNextUnsignedShort();
-                this.dstOffset[i] = (int)offsetBase + srcoff;
+            this.dstOffset = new int[srcoff_count];
+            for (int i = 0; i < srcoff_count; i++) {
+                int offset = reader.readNextUnsignedShort();
+                this.dstOffset[i] = (int)offsetBase + offset;
             }
         } else {
             this.dstOffset = new int[1];
-            this.dstOffset[0] = (int)offsetBase + srcoff;
+            this.dstOffset[0] = (int)offsetBase + srcoff_count;
         }
     }
     
