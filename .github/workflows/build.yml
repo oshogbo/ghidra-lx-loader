@@ -15,7 +15,7 @@ jobs:
       - name: Setup ghidra
         uses: er28-0652/setup-ghidra@master
         with:
-          version: '10.3'
+          version: '11.0'
       - name: Build Ghidra extension (using gradle)
         uses: gradle/gradle-build-action@v2
         with:
