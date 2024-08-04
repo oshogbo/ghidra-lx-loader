@@ -23,7 +23,7 @@ jobs:
         with:
           version: ${{ matrix.ghidra }}
       - name: Build Ghidra extension (using gradle)
-        uses: gradle/gradle-build-action@v2
+        uses: gradle/gradle-build-action@v3
         with:
           gradle-version: 'current'
           arguments: 'buildExtension'
