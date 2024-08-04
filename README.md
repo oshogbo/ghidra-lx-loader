@@ -6,6 +6,13 @@ A Ghidra loader module for the Linear eXecutable Module Format.
 
 Download the ZIP file from the [releases](https://github.com/oshogbo/ghidra-lx-loader/releases) to the `GHIDRA_INSTALL_DIR/Extensions/Ghidra` directory and install the module from the `File > Install extensions...` menu on the main screen.
 
+## Build
+
+If you wish to build this extension manually:
+* Provide `GHIDRA_INSTALL_DIR` environment variable containing a path to Ghidra version you want to compile against
+* run `gradle buildExtension`
+* the resulting .zip file will be placed in `dist` directory and can be installed as usual.
+
 ## ToDos
 
 If you are interested in hellping:
