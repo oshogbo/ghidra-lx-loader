@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'zulu'
       - name: Setup ghidra
-        uses: antoniovazquezblanco/setup-ghidra@v2.0.3
+        uses: antoniovazquezblanco/setup-ghidra@v2.0.5
         with:
           version: ${{ matrix.ghidra }}
       - name: Build Ghidra extension (using gradle)
