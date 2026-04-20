@@ -24,6 +24,7 @@ import ghidra.app.util.bin.ByteProvider;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.app.util.opinion.AbstractLibrarySupportLoader;
 import ghidra.app.util.opinion.LoadSpec;
+import ghidra.app.util.opinion.Loader.ImporterSettings;
 import ghidra.program.flatapi.FlatProgramAPI;
 import ghidra.program.model.lang.LanguageCompilerSpecPair;
 import ghidra.program.model.listing.Program;
@@ -123,13 +124,11 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 	}
 	
 	@Override
-	protected void load(ByteProvider provider, LoadSpec loadSpec, List<Option> options,
-			Program program, TaskMonitor monitor, MessageLog log)
-			throws CancelledException, IOException {
+	protected void load(Program program, ImporterSettings settings) throws CancelledException, IOException {
 		LX lx;
 		long base_addr;
-		BinaryReader reader = new BinaryReader(provider, true);
-		FlatProgramAPI api = new FlatProgramAPI(program, monitor);
+		BinaryReader reader = new BinaryReader(settings.provider(), true);
+		FlatProgramAPI api = new FlatProgramAPI(program, settings.monitor());
 		
 
 	    if(!findStartOffset(reader))
