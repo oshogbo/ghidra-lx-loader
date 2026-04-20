@@ -1,11 +1,11 @@
 # Builds the ghidra-lx-loader extension .zip.
 # Invoke via ./build.sh, which copies the result out of the image.
 
-FROM eclipse-temurin:17-jdk-jammy
+FROM eclipse-temurin:21-jdk-jammy
 
-ARG GHIDRA_VERSION=11.1.1
-ARG GHIDRA_DATE=20240614
-ARG GHIDRA_BUILD=Ghidra_11.1.1_build
+ARG GHIDRA_VERSION=12.0.4
+ARG GHIDRA_DATE=20260303
+ARG GHIDRA_BUILD=Ghidra_12.0.4_build
 ARG GRADLE_VERSION=8.5
 
 ENV GHIDRA_INSTALL_DIR=/opt/ghidra
