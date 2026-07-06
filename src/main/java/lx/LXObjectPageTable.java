@@ -21,7 +21,10 @@ import java.io.IOException;
 import ghidra.app.util.bin.BinaryReader;
 
 /*
- * [Doc]
+ * [Doc] docs/lxexe.txt "Object Page Table" (LX),
+ * docs/exeflat.h lx_map_entry/le_map_entry,
+ * docs/exe_vxd.h o32_map and GETPAGEIDX (LE).
+ *
  * LX object page table entry (8 bytes):
  *        63                     32 31       16 15         0
  *         +-----+-----+-----+-----+-----+-----+-----+-----+

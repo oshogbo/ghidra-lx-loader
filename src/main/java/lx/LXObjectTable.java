@@ -24,7 +24,8 @@ import ghidra.app.util.bin.BinaryReader;
 import ghidra.program.model.mem.MemoryBlock;
 
 /*
- * [Doc]
+ * [Doc] docs/lxexe.txt "Object Table" (flag bits under OBJECT FLAGS):
+ *
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h |     VIRTUAL SIZE      |    RELOC BASE ADDR    |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+

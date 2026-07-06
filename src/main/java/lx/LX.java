@@ -166,11 +166,12 @@ public class LX {
 
 	protected String[] loadImportModuleNameTable(BinaryReader reader) throws IOException {
 		/*
-		 * [Doc]
+		 * [Doc] docs/lxexe.txt "Import Module Name Table":
 		 * public long import_module_name_table_offset;	70h
 		 * public long import_module_name_entry_count;	74h
 		 *
-		 * Length-prefixed strings, back to back.
+		 * Length-prefixed strings, back to back, case sensitive,
+		 * not null terminated. Fixup records index them 1-based.
 		 */
 		String []names = new String[(int)header.import_module_name_entry_count];
 
@@ -311,9 +312,11 @@ public class LX {
 			return (opt.page_num-1) * header.page_size + header.data_pages_offset;
 
 		/*
-		 * [Doc]
-		 * LX: the page data offset is left-shifted by the page
-		 * offset shift and is relative to the data pages offset.
+		 * [Doc] docs/lxexe.txt "Object Page Table", PAGE DATA OFFSET:
+		 * "This field, when bit shifted left by the PAGE OFFSET
+		 * SHIFT from the module header, specifies the offset from
+		 * the beginning of the Preload Page section" - i.e. the
+		 * data pages offset (80h).
 		 */
 		return (opt.page_data_offset << header.page_offset_shift) +
 				header.data_pages_offset;
@@ -324,10 +327,12 @@ public class LX {
 
 		/*
 		 * [Doc]
-		 * Header offset 2Ch is "bytes on last page" for LE, but
-		 * "page offset shift" for LX; an LX page instead carries
-		 * its own data size in the page table entry (the rest of
-		 * the page is zero-filled).
+		 * Header offset 2Ch is "bytes on last page" for LE
+		 * (docs/exe_vxd.h: e32_lastpagesize), but "page offset
+		 * shift" for LX (docs/exeflat.h: the page_shift union
+		 * member); an LX page instead carries its own data size in
+		 * the page table entry and the rest of the page is
+		 * zero-filled (docs/lxexe.txt "Preload Pages").
 		 */
 		if (header.isLe()) {
 			if (oi + 1 == header.module_of_pages)
@@ -452,6 +457,7 @@ public class LX {
 		int page_end_i = getPageEndIndex(ot);
 		int datapos = 0;
 
+		/* Page FLAGS: docs/lxexe.txt "Object Page Table". */
 		for (int oi = (int)ot.page_table_index; oi < page_end_i; oi++) {
 			switch (getLXObjectPageTable(oi).flags) {
 			case 0x00: /* Legal Physical Page. */
@@ -483,7 +489,11 @@ public class LX {
 	}
 
 	public boolean hasEIP() {
-		/* eip_object is -1 when the EIP object number in the header is 0 (no entry point). */
+		/*
+		 * eip_object is -1 when the EIP object number in the header
+		 * is 0: "A zero value for a library module indicates that no
+		 * library entry routine exists" (docs/lxexe.txt, EIP OBJECT #).
+		 */
 		return header.eip_object >= 0 && header.eip_object < object_table.length;
 	}
 

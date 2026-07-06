@@ -22,6 +22,9 @@ import ghidra.app.util.bin.BinaryReader;
 
 public class LXFixupRecordTable {
 	/*
+	 * [Doc] docs/lxexe.txt "Fixup Record Table",
+	 * IBM LX spec Rev 10 (docs/*.pdf) 3.13, figure 3-17:
+	 *
 	 *         +-----+-----+-----+-----+
 	 *     00h | SRC |FLAGS|SRCOFF/CNT*|
 	 *	   +-----+-----+-----+-----+-----+-----+
@@ -74,10 +77,10 @@ public class LXFixupRecordTable {
 		size += 2;
 	}
     	
-    	/* 
-    	 * Source type. Full table (cross-checked against Open Watcom's
-    	 * DOS/32A loader fix_tab in contrib/extender/dos32a/src/dos32a/
-    	 * loader.asm):
+    	/*
+    	 * Source type. Full table (docs/lxexe.txt "Fixup Record Table",
+    	 * SRC; cross-checked against Open Watcom's DOS/32A loader
+    	 * fix_tab in contrib/extender/dos32a/src/dos32a/loader.asm):
     	 *   00h = Byte fixup (8-bits)            -- not yet supported
     	 *   01h = (invalid / reserved)
     	 *   02h = 16-bit Selector fixup (16-bits)
@@ -105,7 +108,11 @@ public class LXFixupRecordTable {
     	}
     	
     	/*
-    	 * [Doc] Target Flags:
+    	 * [Doc] docs/lxexe.txt "Fixup Record Table", FLAGS;
+    	 * record layouts per target type in IBM LX spec Rev 10
+    	 * 3.13.1-3.13.4 (figures 3-18 to 3-21).
+    	 *
+    	 * Target Flags:
     	 *   03h = Target type mask:
     	 *         00h = Internal reference.
     	 *         01h = Imported reference by ordinal.

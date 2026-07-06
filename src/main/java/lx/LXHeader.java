@@ -24,7 +24,9 @@ import ghidra.program.model.data.Structure;
 import ghidra.program.model.data.StructureDataType;
 
 /*
- * [Doc]
+ * [Doc] docs/lxexe.txt "LX Header", IBM LX spec Rev 10 figure 3-7;
+ * the LE (VxD) variant is docs/exe_vxd.h struct e32_exe.
+ *
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h | "L"   "X" |B-ORD|W-ORD|     FORMAT LEVEL      |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
@@ -88,9 +90,9 @@ public class LXHeader implements StructConverter {
 	public long esp;					/* 24h */
 	public long page_size;					/* 28h */
 	/*
-	 * LE: bytes on the last page
-	 * (http://faydoc.tripod.com/formats/exe-LE.htm);
-	 * LX: left shift applied to the page table's page data offsets.
+	 * LE: bytes on the last page (docs/exe_vxd.h: e32_lastpagesize);
+	 * LX: left shift applied to the page table's page data offsets
+	 * (docs/exeflat.h: page_shift).
 	 */
 	public long page_offset_shift;				/* 2Ch */
 	public long fixup_section_size	;			/* 30h */
