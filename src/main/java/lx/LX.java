@@ -292,7 +292,15 @@ public class LX {
 					emitU32(data, frt.getDSTOffset(i), memAddr);
 					break;
 				case 0x08: /* 32-bit Self-relative offset fixup */
-					emitU32(data, frt.getDSTOffset(i), frt.getDSTOffset(i) + frt.trgoff);
+					/*
+					 * The stored value is relative to the end of
+					 * the 32-bit source field: target - (site + 4).
+					 * Open Watcom's DOS/32A loader agrees
+					 * (fix_relofs32 in loader.asm: subtracts the
+					 * site address and 4 from the target).
+					 */
+					emitU32(data, frt.getDSTOffset(i),
+					    memAddr - (ot.reloc_base_addr + frt.getDSTOffset(i) + 4));
 					break;
 				}
 			}
