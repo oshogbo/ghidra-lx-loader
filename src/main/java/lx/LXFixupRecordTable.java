@@ -62,20 +62,26 @@ public class LXFixupRecordTable {
 	}
     	
     	/* 
-    	 * Source type.
-    	 * Supporting:
-    	 * 05h = 16-bit Offset fixup (16-bits).
-    	 * 06h = 16:32 Pointer fixup (48-bits).
-         * 07h = 32-bit Offset fixup (32-bits).
-         * 08h = 32-bit Self-relative offset fixup
-         * 20h = Source List Flag.
-         * 
-         * XXX:
-         * 02h = 16-bit Selector fixup (16-bits).
-         * 10h = Fixup to Alias Flag.
+    	 * Source type. Full table (cross-checked against Open Watcom's
+    	 * DOS/32A loader fix_tab in contrib/extender/dos32a/src/dos32a/
+    	 * loader.asm):
+    	 *   00h = Byte fixup (8-bits)            -- not yet supported
+    	 *   01h = (invalid / reserved)
+    	 *   02h = 16-bit Selector fixup (16-bits)
+    	 *   03h = 16:16 Pointer fixup (32-bits)
+    	 *   04h = (invalid / reserved)
+    	 *   05h = 16-bit Offset fixup (16-bits)
+    	 *   06h = 16:32 Pointer fixup (48-bits)
+    	 *   07h = 32-bit Offset fixup (32-bits)
+    	 *   08h = 32-bit Self-relative offset fixup
+    	 *   20h = Source List flag (modifies SRCOFF encoding, see above)
+    	 *
+    	 * XXX:
+    	 *   10h = Fixup to Alias flag (not yet handled).
 		 */
     	switch (getSourceType()) {
     	case 0x02:
+    	case 0x03:
     	case 0x05:
     	case 0x06:
     	case 0x07:

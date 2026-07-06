@@ -210,6 +210,21 @@ public class LX {
 				}
 
 				switch (frt.getSourceType()) {
+				case 0x03:
+					/*
+					 * 16:16 Pointer — 32 bits on disk: 16-bit offset at +0,
+					 * 16-bit selector at +2. Open Watcom's DOS/32A loader
+					 * (fix_1616ptr in contrib/extender/dos32a/src/dos32a/
+					 * loader.asm) writes both halves:
+					 *   mov gs:[edi+0], ax   ; offset
+					 *   mov gs:[edi+2], dx   ; selector (from object table)
+					 * Ghidra analyzes as x86:LE:32 (flat), so the selector
+					 * has no meaningful analog; we write the offset only
+					 * and leave +2 alone — same compromise the existing
+					 * 0x06 (16:32) handler makes with its selector half.
+					 */
+					emitU16(data, frt.getDSTOffset(i), memAddr);
+					break;
 				case 0x05: /* 16-bit */
 					emitU16(data, frt.getDSTOffset(i), memAddr);
 					break;
