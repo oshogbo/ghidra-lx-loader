@@ -110,41 +110,51 @@ public class LX {
 		}
 	}
 
-	private boolean objectsOverlap() {
-		for (int i = 0; i < object_table.length; i++) {
-			for (int j = i + 1; j < object_table.length; j++) {
-				LXObjectTable a = object_table[i];
-				LXObjectTable b = object_table[j];
-
-				if (a.reloc_base_addr < b.reloc_base_addr + b.virtual_size &&
-				    b.reloc_base_addr < a.reloc_base_addr + a.virtual_size)
-					return true;
-			}
-		}
-
-		return false;
+	private long pageAlign(long addr) {
+		return ((addr + header.page_size - 1) / header.page_size) * header.page_size;
 	}
 
 	protected void assignBaseAddresses() {
 		/*
-		 * VxD-style modules leave reloc_base_addr zero for every object
-		 * and rely on the loader to place them: internal fixups carry an
-		 * (object number, offset) pair, so any consistent assignment
-		 * works. Lay overlapping objects out sequentially, page aligned,
-		 * before any fixups are applied.
+		 * Objects with a zero reloc_base_addr (every object of a
+		 * VxD-style module, resource objects of OS/2 executables)
+		 * rely on the loader to place them, as does an object whose
+		 * header base collides with another object: internal fixups
+		 * carry an (object number, offset) pair, so any consistent
+		 * assignment works. Move only those objects, page aligned,
+		 * past the end of every placed object; objects with sane
+		 * header bases stay where the linker put them.
 		 */
-		long addr;
+		boolean []move = new boolean[object_table.length];
+		long next_free = 0x10000;
 
-		if (!objectsOverlap())
-			return;
-
-		Msg.info(this, "Objects overlap, assigning sequential base addresses");
-
-		addr = 0x10000;
 		for (int i = 0; i < object_table.length; i++) {
-			object_table[i].reloc_base_addr = addr;
-			addr += ((object_table[i].virtual_size + header.page_size - 1) /
-			    header.page_size) * header.page_size;
+			LXObjectTable a = object_table[i];
+
+			move[i] = a.reloc_base_addr == 0;
+			for (int j = 0; j < i && !move[i]; j++) {
+				LXObjectTable b = object_table[j];
+
+				if (move[j])
+					continue;
+				if (a.reloc_base_addr < b.reloc_base_addr + b.virtual_size &&
+				    b.reloc_base_addr < a.reloc_base_addr + a.virtual_size)
+					move[i] = true;
+			}
+			if (!move[i])
+				next_free = Math.max(next_free,
+				    pageAlign(a.reloc_base_addr + a.virtual_size));
+		}
+
+		for (int i = 0; i < object_table.length; i++) {
+			if (!move[i])
+				continue;
+
+			Msg.info(this, String.format(
+			    "Object %d has no usable base address, placing it at 0x%x",
+			    i + 1, next_free));
+			object_table[i].reloc_base_addr = next_free;
+			next_free = pageAlign(next_free + object_table[i].virtual_size);
 		}
 	}
 
