@@ -1,5 +1,5 @@
 loader=Linear eXecutable Module Format
-block=cseg1 start=00010000 size=0x269f9 perms=r-x sha256=aa882266b596fc094cd09383116ba4dca100bddfd40b3670c58d5912129cdf00
+block=cseg1 start=00010000 size=0x269f9 perms=r-x sha256=e89fb4ad1f0661fcc05f12d175d4e4daa894fe07bf86e785fcdaaa3095a099d8
 block=cseg2 start=00040000 size=0xf83 perms=r-x sha256=ee012a965b788b847d42f52bf766e6f0d7443571785fbf5628891cc9fdb49096
-block=dseg3 start=00050000 size=0x51b30 perms=rw- sha256=00ae381fa83e7b91d15a271efbd67222151264858357bcaee3d47c654f320d8d
+block=dseg3 start=00050000 size=0x51b30 perms=rw- sha256=1e0022ed30c01922eae89a2a5559c8e9abdd45a46c140ac5ccb994590e9d9483
 entry=00034984 instr=JMP 0x000349fe

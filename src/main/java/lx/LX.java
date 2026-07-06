@@ -383,19 +383,23 @@ public class LX {
 			memAddr += frt.additive;
 
 			for (int i = 0; i < frt.getDSTOffsetCount(); i++) {
-				if (data.length < frt.getDSTOffset(i)) {
-					/* XXX: What supposed should I do? */
-					/*
-					 * [DOC]
-					 * Note that for fixups that  cross page  boundaries, a
-					 * separate  fixup  record is  specified for each page.
-					 * An offset is still used for the 2nd  page but it now
-					 * becomes a negative offset since the fixup originated
-					 * on  the  preceding page.  (For  example, if only the
-					 * last one byte of a 32-bit address is on the page  to
-					 * be fixed up, then the offset would  have  a value of
-					 * -3.)
-					 */
+				/*
+				 * [Doc] docs/lxexe.txt, note under SRCOFF:
+				 * A fixup that crosses a page boundary gets a
+				 * separate record for each page; the second
+				 * page's offset is negative, back into the
+				 * preceding page. Both records write the same
+				 * value at the same object offset, and object
+				 * data is contiguous here, so applying them is
+				 * idempotent; only writes that would leave the
+				 * object entirely (first or last page of the
+				 * object) are skipped.
+				 */
+				int width = frt.getSourceType() == 0x03 ||
+				    frt.getSourceType() == 0x05 ? 2 : 4;
+
+				if (frt.getDSTOffset(i) < 0 ||
+				    frt.getDSTOffset(i) + width > data.length) {
 					continue;
 				}
 

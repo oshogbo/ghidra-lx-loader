@@ -63,7 +63,14 @@ public class LXFixupRecordTable {
 		srcoff_count = reader.readNextUnsignedByte();
 		size += 1;
 	} else {
-		srcoff_count = reader.readNextUnsignedShort();
+		/*
+		 * [Doc]
+		 * Source offsets are SIGNED (exe_vxd.h: short r32_soff):
+		 * a fixup crossing a page boundary gets a second record on
+		 * the next page with a negative offset back into the
+		 * preceding page (docs/lxexe.txt, note under SRCOFF).
+		 */
+		srcoff_count = reader.readNextShort();
 		size += 2;
 	}
     	
@@ -226,7 +233,7 @@ public class LXFixupRecordTable {
         if ((src & 0x20) == 0x20) {
             this.dstOffset = new int[srcoff_count];
             for (int i = 0; i < srcoff_count; i++) {
-                int offset = reader.readNextUnsignedShort();
+                int offset = reader.readNextShort(); /* Signed, see SRCOFF above. */
                 this.dstOffset[i] = (int)offsetBase + offset;
             }
         } else {
