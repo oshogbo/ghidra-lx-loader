@@ -1,0 +1,12 @@
+loader=Linear eXecutable Module Format
+block=cseg1 start=00010000 size=0x30 perms=r-x sha256=feb99b4ab232fbbbda68d33eab88bfec009d53758f562b97b371909e58fa630b
+block=cseg2 start=00020000 size=0x2cc03 perms=r-x sha256=b3f101502802ba541f664ddae9c5181347bbe39b24dce8bf2cff12a8b2ca38e3
+block=cseg3 start=00050000 size=0x19 perms=r-x sha256=36c2e86f1770393c2ba064a7173c2577df453fa900e11a0ec17cbb0bba5b5a69
+block=dseg4 start=00060000 size=0x17b1 perms=r-- sha256=d73b4b34bb83f64f985dc014e49a2b3b6a54da5592e66611a328029fc1ea319a
+block=dseg5 start=00070000 size=0x8 perms=rw- sha256=af5570f5a1810b7af78caf4bc70a660f0df51e42baf91d4de5b2328de0e83dfc
+block=dseg6 start=00080000 size=0x10 perms=rw- sha256=374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb
+block=dseg7 start=00090000 size=0x11d8d0 perms=rw- sha256=3e653e1dd8b87d6d82219d792abdf074ed4856e583d18b2aed829811168e6867
+block=dseg8 start=001ae000 size=0xc4 perms=r-- sha256=269e4ad4620466f30eba08baa2759d5706d648e87f7dd49b3606f4d58f9bb8d5
+block=dseg9 start=001af000 size=0x2c54 perms=r-- sha256=3ae70fbceb8744f8ace0b61e3ea9b01b41c96f59367085fdfd2cea4e3b4fd07b
+block=imports start=001b2000 size=0x24c perms=r-- sha256=c7606d438ecce7eaef403d65064ab7cf28f5eeb137d59e6e4bd5f88f41a126bb
+entry=000420b0 instr=PUSH EBP
