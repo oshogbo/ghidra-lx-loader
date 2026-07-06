@@ -191,15 +191,17 @@ public class LX {
 
 	private String readImportProcedureName(BinaryReader reader, long offset) throws IOException {
 		/*
-		 * [Doc]
+		 * [Doc] docs/lxexe.txt "Import Procedure Name Table":
 		 * public long import_procedure_name_table_offset;	78h
 		 *
 		 * Length-prefixed strings; fixup records reference them by
-		 * byte offset into the table.
+		 * byte offset into the table. Strings are limited to 127
+		 * characters: bit 7 of LEN is an "Overload bit" reserved
+		 * for parameter type checking, not part of the length.
 		 */
 		reader.setPointerIndex(base_addr +
 		    header.import_procedure_name_table_offset + offset);
-		int len = reader.readNextUnsignedByte();
+		int len = reader.readNextUnsignedByte() & 0x7F;
 		return reader.readNextAsciiString(len);
 	}
 
