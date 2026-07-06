@@ -35,7 +35,7 @@ I verified output of the module vs IDA Freeware 4.1 and swars source code.
 
 * [LX documentation](http://www.textfiles.com/programming/FORMATS/lxexe.txt)
 * [dos4gw loader](https://github.com/BoomerangDecompiler/boomerang/tree/next/loader/exe/dos4gw)
-* [swars](http://swars.vexillium.org/)
+* [swars](https://web.archive.org/web/20220128014304/http://swars.vexillium.org/)
 * [The tale of Syndicate Wars Port](https://gynvael.coldwind.pl/?id=279)
 * [mortalkombat](http://blog.rewolf.pl/blog/?p=1837)
 * [ghidra-switch-loader](https://github.com/Adubbz/Ghidra-Switch-Loader/)
