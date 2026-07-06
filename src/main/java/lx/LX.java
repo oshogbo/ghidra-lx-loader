@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import ghidra.app.util.bin.BinaryReader;
+import ghidra.util.Msg;
 
 public class LX {
 	private long base_addr;
@@ -109,6 +110,44 @@ public class LX {
 		}
 	}
 
+	private boolean objectsOverlap() {
+		for (int i = 0; i < object_table.length; i++) {
+			for (int j = i + 1; j < object_table.length; j++) {
+				LXObjectTable a = object_table[i];
+				LXObjectTable b = object_table[j];
+
+				if (a.reloc_base_addr < b.reloc_base_addr + b.virtual_size &&
+				    b.reloc_base_addr < a.reloc_base_addr + a.virtual_size)
+					return true;
+			}
+		}
+
+		return false;
+	}
+
+	protected void assignBaseAddresses() {
+		/*
+		 * VxD-style modules leave reloc_base_addr zero for every object
+		 * and rely on the loader to place them: internal fixups carry an
+		 * (object number, offset) pair, so any consistent assignment
+		 * works. Lay overlapping objects out sequentially, page aligned,
+		 * before any fixups are applied.
+		 */
+		long addr;
+
+		if (!objectsOverlap())
+			return;
+
+		Msg.info(this, "Objects overlap, assigning sequential base addresses");
+
+		addr = 0x10000;
+		for (int i = 0; i < object_table.length; i++) {
+			object_table[i].reloc_base_addr = addr;
+			addr += ((object_table[i].virtual_size + header.page_size - 1) /
+			    header.page_size) * header.page_size;
+		}
+	}
+
 	public LX(BinaryReader reader, long base_addr, long exeoffset) throws IOException {
 		this.base_addr = base_addr;
 		reader.setPointerIndex(base_addr);
@@ -119,8 +158,9 @@ public class LX {
 		 * in an MZ/LE, add the offset to the beginning of the embedded exe.
 		 */
 		header.data_pages_offset += exeoffset;
-		
+
 		object_table = loadObjectTable(reader);
+		assignBaseAddresses();
 		object_page_table = loadObjectPageTable(reader);
 		fixup_page_table = loadFixupPageTable(reader);
 		loadFixupRecordTable(reader);
