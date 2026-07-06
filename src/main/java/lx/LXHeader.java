@@ -151,6 +151,13 @@ public class LXHeader implements StructConverter {
 		module_version = reader.readNextUnsignedInt();
 		module_flag = reader.readNextUnsignedInt();
 		module_of_pages = reader.readNextUnsignedInt();
+		/*
+		 * [Doc]
+		 * The object number is a 1-based index into the object table.
+		 * A value of zero means the module has no entry point (e.g.
+		 * VxDs and most DLLs), so after the -1 bias "no entry point"
+		 * is stored as -1.
+		 */
 		eip_object = reader.readNextUnsignedInt() - 1;
 		eip = reader.readNextUnsignedInt();
 		esp_object = reader.readNextUnsignedInt();

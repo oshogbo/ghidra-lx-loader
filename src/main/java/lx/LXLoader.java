@@ -160,8 +160,13 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			}
 		}
 		
-		api.addEntryPoint(api.toAddr(lx.getEIPAddress()));
-		api.disassemble(api.toAddr(lx.getEIPAddress()));
-		api.createFunction(api.toAddr(lx.getEIPAddress()), "_entry");
+		/* VxDs and most DLLs have no EIP entry point (EIP object # is 0). */
+		if (lx.hasEIP()) {
+			api.addEntryPoint(api.toAddr(lx.getEIPAddress()));
+			api.disassemble(api.toAddr(lx.getEIPAddress()));
+			api.createFunction(api.toAddr(lx.getEIPAddress()), "_entry");
+		} else {
+			Msg.info(this, "Module has no entry point (EIP object is 0), skipping entry point creation");
+		}
 	}
 }

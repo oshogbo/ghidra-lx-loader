@@ -261,6 +261,11 @@ public class LX {
 		return data;
 	}
 
+	public boolean hasEIP() {
+		/* eip_object is -1 when the EIP object number in the header is 0 (no entry point). */
+		return header.eip_object >= 0 && header.eip_object < object_table.length;
+	}
+
 	public long getEIPAddress() {
 		return getLXObjectTable((int)header.eip_object).reloc_base_addr + header.eip;
 	}
