@@ -21,7 +21,8 @@ if ! ls "$REPO_DIR/dist/"*.zip >/dev/null 2>&1; then
     (cd "$REPO_DIR" && gradle --no-daemon buildExtension)
 fi
 EXT_ZIP=$(ls -t "$REPO_DIR/dist/"*.zip | head -1)
-EXT_NAME=$(basename "$EXT_ZIP" .zip)
+# The zip unpacks to the extension's directory, not the zip basename.
+EXT_NAME=$(unzip -Z1 "$EXT_ZIP" | head -1 | cut -d/ -f1)
 
 EXT_ROOT="$GHIDRA_INSTALL_DIR/Ghidra/Extensions"
 EXT_DIR="$EXT_ROOT/$EXT_NAME"
