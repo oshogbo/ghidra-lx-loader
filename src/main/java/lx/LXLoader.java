@@ -160,6 +160,28 @@ public class LXLoader extends AbstractLibrarySupportLoader {
 			}
 		}
 		
+		/*
+		 * Give import fixup targets a home: one labeled 4-byte slot
+		 * per imported procedure, in a synthetic block past the last
+		 * object.
+		 */
+		if (lx.hasImports()) {
+			try {
+				MemoryBlock block = api.createMemoryBlock("imports",
+				    api.toAddr(lx.getImportBlockBase()),
+				    new byte[(int)lx.getImportBlockSize()], false);
+				block.setRead(true);
+				block.setWrite(false);
+				block.setExecute(false);
+
+				for (Map.Entry<String, Long> slot : lx.getImportSlots().entrySet()) {
+					api.createLabel(api.toAddr(slot.getValue()), slot.getKey(), true);
+				}
+			} catch (Exception e) {
+				Msg.error(this, e.getMessage());
+			}
+		}
+
 		/* VxDs and most DLLs have no EIP entry point (EIP object # is 0). */
 		if (lx.hasEIP()) {
 			api.addEntryPoint(api.toAddr(lx.getEIPAddress()));

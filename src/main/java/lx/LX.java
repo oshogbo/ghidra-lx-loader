@@ -18,6 +18,8 @@ package lx;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.util.Msg;
@@ -28,6 +30,10 @@ public class LX {
 	private LXObjectTable []object_table;
 	private LXObjectPageTable []object_page_table;
 	private LXFixupPageTable []fixup_page_table;
+	private String []import_module_names;
+	/* Import slot address keyed by label, insertion ordered. */
+	private LinkedHashMap<String, Long> import_slots = new LinkedHashMap<String, Long>();
+	private long import_base;
 
 	protected LXObjectTable[] loadObjectTable(BinaryReader reader) throws IOException {
 		/*
@@ -158,6 +164,108 @@ public class LX {
 		}
 	}
 
+	protected String[] loadImportModuleNameTable(BinaryReader reader) throws IOException {
+		/*
+		 * [Doc]
+		 * public long import_module_name_table_offset;	70h
+		 * public long import_module_name_entry_count;	74h
+		 *
+		 * Length-prefixed strings, back to back.
+		 */
+		String []names = new String[(int)header.import_module_name_entry_count];
+
+		reader.setPointerIndex(base_addr + header.import_module_name_table_offset);
+		for (int i = 0; i < names.length; i++) {
+			int len = reader.readNextUnsignedByte();
+			names[i] = reader.readNextAsciiString(len);
+		}
+
+		return names;
+	}
+
+	private String importModuleName(long i) {
+		if (i >= 0 && i < import_module_names.length)
+			return import_module_names[(int)i];
+		return "module" + (i + 1);
+	}
+
+	private String readImportProcedureName(BinaryReader reader, long offset) throws IOException {
+		/*
+		 * [Doc]
+		 * public long import_procedure_name_table_offset;	78h
+		 *
+		 * Length-prefixed strings; fixup records reference them by
+		 * byte offset into the table.
+		 */
+		reader.setPointerIndex(base_addr +
+		    header.import_procedure_name_table_offset + offset);
+		int len = reader.readNextUnsignedByte();
+		return reader.readNextAsciiString(len);
+	}
+
+	protected void assignImportSlots(BinaryReader reader) throws IOException {
+		/*
+		 * Give every unique import target a 4-byte slot in a
+		 * synthetic block placed past the last object, so fixup
+		 * sites have a concrete address to point at; the loader
+		 * labels each slot with the module and procedure.
+		 */
+		LXObjectTable ot;
+		Iterator<LXFixupRecordTable> itr;
+		LXFixupRecordTable frt;
+		String label;
+
+		import_base = 0x10000;
+		for (int i = 0; i < object_table.length; i++) {
+			ot = object_table[i];
+			import_base = Math.max(import_base,
+			    pageAlign(ot.reloc_base_addr + ot.virtual_size));
+		}
+
+		for (int i = 0; i < object_table.length; i++) {
+			itr = object_table[i].fixupTableIterator();
+			while (itr.hasNext()) {
+				frt = itr.next();
+
+				switch (frt.getTargetType()) {
+				case 0x01: /* Imported by ordinal. */
+					label = importModuleName(frt.module) +
+					    "_Ord" + frt.import_ordinal;
+					break;
+				case 0x02: /* Imported by name. */
+					label = importModuleName(frt.module) + "_" +
+					    readImportProcedureName(reader, frt.name_offset);
+					break;
+				default:
+					continue;
+				}
+				label = label.replaceAll("[^A-Za-z0-9_]", "_");
+
+				if (!import_slots.containsKey(label)) {
+					import_slots.put(label,
+					    import_base + import_slots.size() * 4L);
+				}
+				frt.import_addr = import_slots.get(label);
+			}
+		}
+	}
+
+	public boolean hasImports() {
+		return !import_slots.isEmpty();
+	}
+
+	public long getImportBlockBase() {
+		return import_base;
+	}
+
+	public long getImportBlockSize() {
+		return import_slots.size() * 4L;
+	}
+
+	public Map<String, Long> getImportSlots() {
+		return import_slots;
+	}
+
 	public LX(BinaryReader reader, long base_addr, long exeoffset) throws IOException {
 		this.base_addr = base_addr;
 		reader.setPointerIndex(base_addr);
@@ -174,6 +282,8 @@ public class LX {
 		object_page_table = loadObjectPageTable(reader);
 		fixup_page_table = loadFixupPageTable(reader);
 		loadFixupRecordTable(reader);
+		import_module_names = loadImportModuleNameTable(reader);
+		assignImportSlots(reader);
 	}
 
 	public LXHeader getHeader() {
@@ -256,7 +366,21 @@ public class LX {
 				continue;
 			}
 
-			memAddr = getLXObjectTable((int)frt.object).reloc_base_addr + frt.trgoff;
+			switch (frt.getTargetType()) {
+			case 0x00: /* Internal reference. */
+				memAddr = getLXObjectTable((int)frt.object).reloc_base_addr +
+				    frt.trgoff;
+				break;
+			case 0x01: /* Imported by ordinal. */
+			case 0x02: /* Imported by name. */
+				/* Slot assigned by assignImportSlots(). */
+				memAddr = frt.import_addr;
+				break;
+			default: /* 0x03, internal via entry table. */
+				Msg.warn(this, "Entry table fixup not supported, skipping");
+				continue;
+			}
+			memAddr += frt.additive;
 
 			for (int i = 0; i < frt.getDSTOffsetCount(); i++) {
 				if (data.length < frt.getDSTOffset(i)) {
