@@ -27,7 +27,7 @@ RUN curl -fsSL -o /tmp/ghidra.zip \
     mv "/opt/ghidra_${GHIDRA_VERSION}_PUBLIC" "${GHIDRA_INSTALL_DIR}" && \
     rm /tmp/ghidra.zip
 
-WORKDIR /src
+WORKDIR /build/ghidra-lx-loader
 COPY . .
 
 RUN gradle --no-daemon buildExtension
