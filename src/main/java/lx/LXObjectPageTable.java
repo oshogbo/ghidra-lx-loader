@@ -22,18 +22,27 @@ import ghidra.app.util.bin.BinaryReader;
 
 /*
  * [Doc]
- * XXX: WTF???? This doesn't seem right.
+ * LX object page table entry (8 bytes):
  *        63                     32 31       16 15         0
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
  *     00h |    PAGE DATA OFFSET   | DATA SIZE |   FLAGS   |
  *         +-----+-----+-----+-----+-----+-----+-----+-----+
- * More reliable looks:
- *        32                      16           8           0
- *         +-----+-----+-----+-----+-----+-----+-----+-----+
- *     00h |    PAGE DATA OFFSET   | DATA SIZE |   FLAGS   |
- *         +-----+-----+-----+-----+-----+-----+-----+-----+
- *         
- *         
+ *
+ * PAGE DATA OFFSET is relative to the data pages offset and is
+ * left-shifted by the header's page offset shift; DATA SIZE is the
+ * number of bytes present in the file (the rest of the page is
+ * zero-filled).
+ *
+ * LE object page table entry (4 bytes): a 24-bit big-endian page
+ * number followed by a flags byte; pages are stored consecutively,
+ * page_size each.
+ *
+ * FLAGS:
+ *   00h = Legal Physical Page in the module.
+ *   01h = Iterated Data Page.
+ *   02h = Invalid Page.
+ *   03h = Zero Filled Page.
+ *   04h = Range of pages.
  */
 public class LXObjectPageTable {
 	// LX format
@@ -42,23 +51,24 @@ public class LXObjectPageTable {
 
 	// LE format
 	public long page_num;
-	
+
 	public int flags;
-	
+
 	public LXObjectPageTable(BinaryReader reader, boolean bisLe) throws IOException {
-		
+
 		if (bisLe) {
 			page_num = reader.readNextUnsignedByte();
 			page_num = page_num << 8;
 			page_num |= reader.readNextUnsignedByte();
 			page_num = page_num << 8;
-			page_num |= reader.readNextUnsignedByte();		
+			page_num |= reader.readNextUnsignedByte();
+			flags = reader.readNextUnsignedByte();
 		} else {
-			page_data_offset = reader.readNextShort();
-			data_size = reader.readNextUnsignedByte();
+			page_data_offset = reader.readNextUnsignedInt();
+			data_size = reader.readNextUnsignedShort();
+			flags = reader.readNextUnsignedShort();
 		}
-		flags = reader.readNextUnsignedByte();
-		
+
 		if (flags > 4) {
 			throw new UnknownError("Wrong flags" + Integer.toString(flags));
 		}

@@ -188,16 +188,32 @@ public class LX {
 		if (header.isLe())
 			return (opt.page_num-1) * header.page_size + header.data_pages_offset;
 
-		return (opt.page_data_offset + opt.data_size - 1) *
-				header.page_size + header.data_pages_offset;
+		/*
+		 * [Doc]
+		 * LX: the page data offset is left-shifted by the page
+		 * offset shift and is relative to the data pages offset.
+		 */
+		return (opt.page_data_offset << header.page_offset_shift) +
+				header.data_pages_offset;
 	}
 
 	private long getPageFileSize(LXObjectTable ohdr, int oi, long datapos) {
 		assert(oi + 1 <= header.module_of_pages);
 
-		if (oi + 1 == header.module_of_pages)
-			return Math.min(ohdr.virtual_size - datapos, header.page_offset_shift);
-		return Math.min(ohdr.virtual_size - datapos, header.page_size);
+		/*
+		 * [Doc]
+		 * Header offset 2Ch is "bytes on last page" for LE, but
+		 * "page offset shift" for LX; an LX page instead carries
+		 * its own data size in the page table entry (the rest of
+		 * the page is zero-filled).
+		 */
+		if (header.isLe()) {
+			if (oi + 1 == header.module_of_pages)
+				return Math.min(ohdr.virtual_size - datapos, header.page_offset_shift);
+			return Math.min(ohdr.virtual_size - datapos, header.page_size);
+		}
+		return Math.min(ohdr.virtual_size - datapos,
+				getLXObjectPageTable(oi).data_size);
 	}
 
 	private int getPageEndIndex(LXObjectTable ohdr) {
@@ -289,11 +305,28 @@ public class LX {
 		int datapos = 0;
 
 		for (int oi = (int)ot.page_table_index; oi < page_end_i; oi++) {
-			int rsize = (int)getPageFileSize(ot, oi, datapos);
-			byte []xdata = reader.readByteArray(getPageFileOffset(oi), rsize);
+			switch (getLXObjectPageTable(oi).flags) {
+			case 0x00: /* Legal Physical Page. */
+				int rsize = (int)getPageFileSize(ot, oi, datapos);
+				byte []xdata = reader.readByteArray(getPageFileOffset(oi), rsize);
 
-			System.arraycopy(xdata, 0, data, datapos, rsize);
-			datapos += rsize;
+				System.arraycopy(xdata, 0, data, datapos, rsize);
+				break;
+			case 0x02: /* Invalid Page. */
+			case 0x03: /* Zero Filled Page. */
+				break;
+			default:
+				Msg.warn(this, String.format(
+				    "Unsupported page flags 0x%x, leaving page %d zeroed",
+				    getLXObjectPageTable(oi).flags, oi + 1));
+				break;
+			}
+
+			/*
+			 * A page occupies page_size bytes in memory no matter
+			 * how many bytes the file provides for it.
+			 */
+			datapos += (int)Math.min(ot.virtual_size - datapos, header.page_size);
 		}
 
 		applyFixups(ot, data);

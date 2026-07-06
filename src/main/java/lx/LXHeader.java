@@ -88,8 +88,9 @@ public class LXHeader implements StructConverter {
 	public long esp;					/* 24h */
 	public long page_size;					/* 28h */
 	/*
-	 * ? bytes on the last page?
-	 * http://faydoc.tripod.com/formats/exe-LE.htm
+	 * LE: bytes on the last page
+	 * (http://faydoc.tripod.com/formats/exe-LE.htm);
+	 * LX: left shift applied to the page table's page data offsets.
 	 */
 	public long page_offset_shift;				/* 2Ch */
 	public long fixup_section_size	;			/* 30h */
